@@ -1,17 +1,6 @@
-import os
-import sys
-from pathlib import Path
-
-from redis import Redis
 from rq import Worker, Queue
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-redis_conn = Redis(
-    host="localhost",
-    port=6378,
-    decode_responses=True
-)
+from app.redis_client import redis_conn
 
 listen = ["command_code"]
 
@@ -22,6 +11,4 @@ if __name__ == "__main__":
     )
 
     print("Worker started...")
-    print(redis_conn)
-    print(redis_conn.connection_pool.connection_kwargs)
     worker.work()
