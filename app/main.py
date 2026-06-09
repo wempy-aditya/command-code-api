@@ -53,9 +53,14 @@ async def create_chat_completion(
 @app.get("/v1/jobs/{job_id}")
 async def get_job(job_id: str):
 
-    data = redis_conn.hgetall(
-        f"job:{job_id}"
+    raw = redis_conn.hgetall(
+    f"job:{job_id}"
     )
+
+    data = {
+        k.decode(): v.decode()
+        for k, v in raw.items()
+    }
 
     if not data:
         return {
