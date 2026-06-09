@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from fastapi import FastAPI
+from app.tasks import run_command_code
 
 from app.models import ChatCompletionRequest
 from app.queue import queue
@@ -34,6 +35,12 @@ async def create_chat_completion(
             "status": "queued",
             "prompt": prompt
         }
+    )
+
+    queue.enqueue(
+        run_command_code,
+        prompt,
+        job_id=job_id
     )
 
     return {
