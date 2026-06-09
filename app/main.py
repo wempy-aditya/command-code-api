@@ -40,7 +40,7 @@ async def create_chat_completion(
     queue.enqueue(
         run_command_code,
         prompt,
-        job_id=job_id
+        job_id
     )
 
     return {
@@ -54,17 +54,24 @@ async def create_chat_completion(
 async def get_job(job_id: str):
 
     raw = redis_conn.hgetall(
-    f"job:{job_id}"
+        f"job:{job_id}"
     )
 
-    data = {
-        k.decode(): v.decode()
-        for k, v in raw.items()
-    }
-
-    if not data:
+    if not raw:
         return {
             "error": "job not found"
         }
+
+    data = {}
+
+    for k, v in raw.items():
+
+        if isinstance(k, bytes):
+            k = k.decode()
+
+        if isinstance(v, bytes):
+            v = v.decode()
+
+        data[k] = v
 
     return data
