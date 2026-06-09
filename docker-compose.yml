@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
 
     ports:
-      - "6379:6379"
+      - "6378:6378"
 
     volumes:
       - redis_data:/data
