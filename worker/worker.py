@@ -22,4 +22,6 @@ if __name__ == "__main__":
     )
 
     print("Worker started...")
+    print(redis_conn)
+    print(redis_conn.connection_pool.connection_kwargs)
     worker.work()
