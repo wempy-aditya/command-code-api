@@ -1,4 +1,10 @@
+from uuid import uuid4
+
 from fastapi import FastAPI
+
+from app.models import ChatCompletionRequest
+from app.queue import queue
+from app.redis_client import redis_conn
 
 app = FastAPI(
     title="Command Code API",
@@ -11,3 +17,42 @@ async def health():
     return {
         "status": "ok"
     }
+
+
+@app.post("/v1/chat/completions")
+async def create_chat_completion(
+    request: ChatCompletionRequest
+):
+
+    job_id = str(uuid4())
+
+    prompt = request.messages[-1].content
+
+    redis_conn.hset(
+        f"job:{job_id}",
+        mapping={
+            "status": "queued",
+            "prompt": prompt
+        }
+    )
+
+    return {
+        "id": job_id,
+        "object": "chat.completion.job",
+        "status": "queued"
+    }
+
+
+@app.get("/v1/jobs/{job_id}")
+async def get_job(job_id: str):
+
+    data = redis_conn.hgetall(
+        f"job:{job_id}"
+    )
+
+    if not data:
+        return {
+            "error": "job not found"
+        }
+
+    return data
